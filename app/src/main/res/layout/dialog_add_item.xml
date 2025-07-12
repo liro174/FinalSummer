@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <EditText
+        android:id="@+id/editTextItemName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="שם הפריט"
+        android:inputType="textCapSentences"
+        android:minHeight="48dp" />
+
+    <EditText
+        android:id="@+id/editTextPrice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="מחיר"
+        android:inputType="number"
+        android:layout_marginTop="10dp"
+        android:minHeight="48dp" />
+    <EditText
+        android:id="@+id/editTextPurchaseDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="תאריך רכישה"
+        android:focusable="false"       android:clickable="true"      android:layout_marginTop="10dp"
+        android:minHeight="48dp" />
+
+</LinearLayout>
