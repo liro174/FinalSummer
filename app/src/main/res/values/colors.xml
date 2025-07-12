@@ -7,5 +7,6 @@
     <color name="green">#FF00FF00</color>
     <color name="blue">#FF0000FF</color>
     <color name="light_gray">#FFC0C0C0</color>"
+    <color name="material_dynamic_primary40">#FF6200EE</color>
 
 </resources>

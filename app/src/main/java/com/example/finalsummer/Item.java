@@ -5,14 +5,14 @@ public class Item {
     private int price;
     private String purchaseDate;
 
-    // קונסטרוקטור ליצירת אובייקט Item חדש
+
     public Item(String itemName, int price, String purchaseDate) {
         this.itemName = itemName;
         this.price = price;
         this.purchaseDate = purchaseDate;
     }
 
-    // מתודות Getters כדי לקבל את ערכי התכונות
+
     public String getItemName() {
         return itemName;
     }
@@ -25,7 +25,7 @@ public class Item {
         return purchaseDate;
     }
 
-    // (אופציונלי) מתודות Setters אם תרצה לשנות את הערכים לאחר יצירת האובייקט
+
     public void setItemName(String itemName) {
         this.itemName = itemName;
     }

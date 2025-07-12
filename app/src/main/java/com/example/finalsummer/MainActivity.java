@@ -126,9 +126,9 @@ public class MainActivity extends AppCompatActivity {
             fragmentContainer.setVisibility(View.VISIBLE);
 
             // קרא לפונקציה של ה-Fragment כדי להציג את התוכן הפנימי שלו
-            if (blankFragment != null) {
-                blankFragment.showButtonsAndDefaultView();
-            }
+            //if (blankFragment != null) {
+                //blankFragment.showButtonsAndDefaultView();
+            //}
 
             // 🚨 הסתר את שדות הקלט, כפתור השמירה, כפתור הצילום וה-ImageView
             editTextUsername.setVisibility(View.GONE);
