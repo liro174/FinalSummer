@@ -1,5 +1,5 @@
-package com.example.finalsummer; 
-
+package com.example.finalsummer;
+// 12/07 מסך פתיחה וולידציה ומערך לפרגמנט
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
