@@ -1,48 +1,68 @@
-package com.example.finalsummer; // <--- ENSURE THIS PACKAGE NAME IS CORRECT
+package com.example.finalsummer;
 
+import android.app.Application;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BlankFragmentViewModel extends ViewModel {
+public class BlankFragmentViewModel extends AndroidViewModel {
 
-    private MutableLiveData<List<Item>> itemList;
-    private MutableLiveData<List<String>> view2SelectedItems; // <--- THIS LINE IS CRUCIAL
+    private ItemDao itemDao;
+    private LiveData<List<Item>> allItems;
+    private MutableLiveData<List<String>> view2SelectedItems;
 
-    public LiveData<List<Item>> getItemList() {
-        if (itemList == null) {
-            itemList = new MutableLiveData<>();
-            List<Item> initialList = new ArrayList<>();
-            itemList.setValue(initialList);
-        }
-        return itemList;
-    }
+    private LiveData<Integer> totalPrice;
+    private LiveData<Integer> itemCount;
 
-    // THIS METHOD MUST BE EXACTLY AS SHOWN BELOW
-    public LiveData<List<String>> getView2SelectedItems() {
+    // --- NEW: LiveData fields for most expensive and cheapest items ---
+    private LiveData<Item> mostExpensiveItem;
+    private LiveData<Item> cheapestItem;
+    // -----------------------------------------------------------------
+
+    public BlankFragmentViewModel(Application application) {
+        super(application);
+        AppDatabase db = AppDatabase.getDatabase(application);
+        itemDao = db.itemDao();
+        allItems = itemDao.getAllItems();
+
         if (view2SelectedItems == null) {
             view2SelectedItems = new MutableLiveData<>();
             view2SelectedItems.setValue(new ArrayList<>());
         }
-        return view2SelectedItems;
+
+        totalPrice = itemDao.getTotalPrice();
+        itemCount = itemDao.getItemCount();
+
+        // --- NEW: Initialize LiveData fields from ItemDao ---
+        mostExpensiveItem = itemDao.getMostExpensiveItem();
+        cheapestItem = itemDao.getCheapestItem();
+        // ---------------------------------------------------
+    }
+
+    public LiveData<List<Item>> getItemList() {
+        return allItems;
     }
 
     public void addItem(Item newItem) {
-        List<Item> currentList = itemList.getValue();
-        if (currentList != null) {
-            currentList.add(newItem);
-            itemList.setValue(currentList);
-        }
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            itemDao.insert(newItem);
+        });
     }
 
     public void removeItem(int position) {
-        List<Item> currentList = itemList.getValue();
+        List<Item> currentList = allItems.getValue();
         if (currentList != null && position >= 0 && position < currentList.size()) {
-            currentList.remove(position);
-            itemList.setValue(currentList);
+            Item itemToDelete = currentList.get(position);
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                itemDao.delete(itemToDelete);
+            });
         }
+    }
+
+    public LiveData<List<String>> getView2SelectedItems() {
+        return view2SelectedItems;
     }
 
     public void addView2Item(String itemName) {
@@ -52,4 +72,22 @@ public class BlankFragmentViewModel extends ViewModel {
             view2SelectedItems.setValue(currentSelectedItems);
         }
     }
+
+    public LiveData<Integer> getTotalPrice() {
+        return totalPrice;
+    }
+
+    public LiveData<Integer> getItemCount() {
+        return itemCount;
+    }
+
+    // --- NEW: Getters for most expensive and cheapest items ---
+    public LiveData<Item> getMostExpensiveItem() {
+        return mostExpensiveItem;
+    }
+
+    public LiveData<Item> getCheapestItem() {
+        return cheapestItem;
+    }
+    // ----------------------------------------------------------
 }

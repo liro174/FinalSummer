@@ -1,5 +1,5 @@
 package com.example.finalsummer;
-// 12/07 מסך פתיחה וולידציה ומערך לפרגמנט
+
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -7,7 +7,7 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
+import android.widget.FrameLayout; // Make sure this is imported
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -15,20 +15,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-// Import BlankFragment - make sure this import matches your BlankFragment's package
-// import com.example.your_app_name.BlankFragment; // Example: Adjust this if needed
-
 public class MainActivity extends AppCompatActivity {
 
     private EditText editTextUsername;
-    private EditText editTextFamilyName;
+    private EditText editTextFamilyName, editTextPhone;
     private Button buttonLogin;
-    private FrameLayout fragmentContainer;
-    private BlankFragment blankFragment; // Assuming BlankFragment is defined elsewhere
+    // Renamed to match the new ID in activity_main.xml
+    private FrameLayout mainFragmentContainer;
 
-    // Camera related views
     private Button buttonTakePhoto;
     private ImageView imageViewPhoto;
+
+    // Removed: private BottomNavigationView bottomNav; // This ID no longer exists in activity_main.xml
+
+    private BlankFragment blankFragment; // Declared here for broader scope
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
 
@@ -39,44 +39,39 @@ public class MainActivity extends AppCompatActivity {
 
         editTextUsername = findViewById(R.id.editTextName);
         editTextFamilyName = findViewById(R.id.editFamName);
+        editTextPhone= findViewById(R.id.editTextPhone);
         buttonLogin = findViewById(R.id.buttonSave);
-        fragmentContainer = findViewById(R.id.fragment_container);
+        // Correctly find the FrameLayout with its new ID
+        mainFragmentContainer = findViewById(R.id.main_fragment_container);
 
-        // אתחול כפתור הצילום וה-ImageView
         buttonTakePhoto = findViewById(R.id.buttonTakePhoto);
         imageViewPhoto = findViewById(R.id.imageViewPhoto);
 
-        fragmentContainer.setVisibility(View.GONE);
+        // Remove any findViewById or setup for bottomNav here, as it's no longer in activity_main.xml
+        // bottomNav = findViewById(R.id.bottom_navigation); // REMOVE THIS LINE
+        // bottomNav.setOnNavigationItemSelectedListener(navListener); // REMOVE THIS LINE
+        // bottomNav.setVisibility(View.GONE); // REMOVE THIS LINE
 
-        buttonLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                performValidation();
-            }
-        });
+        mainFragmentContainer.setVisibility(View.GONE); // Initially hide fragment container
 
-        // Set the OnClickListener for the takePhoto button
-        buttonTakePhoto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dispatchTakePictureIntent(); // Call the function to launch the camera
-            }
-        });
+        buttonLogin.setOnClickListener(v -> performValidation());
+        buttonTakePhoto.setOnClickListener(v -> dispatchTakePictureIntent());
 
         if (savedInstanceState == null) {
-            blankFragment = new BlankFragment(); // Make sure BlankFragment is accessible
+            blankFragment = new BlankFragment();
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.add(R.id.fragment_container, blankFragment);
+            // Use the new ID when adding the fragment
+            fragmentTransaction.add(R.id.main_fragment_container, blankFragment);
             fragmentTransaction.commit();
         } else {
-            blankFragment = (BlankFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+            // Use the new ID when finding the fragment
+            blankFragment = (BlankFragment) getSupportFragmentManager().findFragmentById(R.id.main_fragment_container);
         }
     }
 
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         } else {
@@ -88,20 +83,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            // Get the thumbnail bitmap from the intent's data
-            // Note: This often returns a small thumbnail, not the full-resolution image.
-            // If you need the full image, you'll need the previous FileProvider approach.
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             if (imageBitmap != null) {
                 imageViewPhoto.setImageBitmap(imageBitmap);
-                imageViewPhoto.setVisibility(View.VISIBLE); // Make sure the ImageView is visible after taking a photo
+                imageViewPhoto.setVisibility(View.VISIBLE);
             } else {
                 Toast.makeText(this, "לא הוחזרה תמונה.", Toast.LENGTH_SHORT).show();
             }
         } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_CANCELED) {
             Toast.makeText(this, "צילום בוטל.", Toast.LENGTH_SHORT).show();
-            // If the user cancels, ensure the ImageView is hidden if no photo was taken
             imageViewPhoto.setVisibility(View.GONE);
         }
     }
@@ -112,43 +103,33 @@ public class MainActivity extends AppCompatActivity {
 
         if (username.isEmpty() || familyName.isEmpty()) {
             Toast.makeText(this, "שם פרטי ושם משפחה אינם יכולים להיות ריקים.", Toast.LENGTH_LONG).show();
-            fragmentContainer.setVisibility(View.GONE);
-            if (blankFragment != null) {
-                blankFragment.hideAll();
-            }
-            // ודא שהכפתורים והתמונה גלויים אם הולידציה נכשלה בגלל שדות ריקים
+            mainFragmentContainer.setVisibility(View.GONE); // Use new ID
             showPreValidationViews();
 
         } else if (username.equalsIgnoreCase("OFIR") && familyName.equalsIgnoreCase("LIRON")) {
             Toast.makeText(this, "ולידציה הצליחה! ברוך הבא " + username + " " + familyName, Toast.LENGTH_SHORT).show();
 
-            // הפוך את ה-fragmentContainer לגלוי
-            fragmentContainer.setVisibility(View.VISIBLE);
-
-            // קרא לפונקציה של ה-Fragment כדי להציג את התוכן הפנימי שלו
-            //if (blankFragment != null) {
-                //blankFragment.showButtonsAndDefaultView();
-            //}
-
-            // 🚨 הסתר את שדות הקלט, כפתור השמירה, כפתור הצילום וה-ImageView
+            // Hide pre-validation views
             editTextUsername.setVisibility(View.GONE);
             editTextFamilyName.setVisibility(View.GONE);
             buttonLogin.setVisibility(View.GONE);
-            buttonTakePhoto.setVisibility(View.GONE); // הסתר את כפתור הצילום
-            imageViewPhoto.setVisibility(View.GONE);  // הסתר את ה-ImageView
+            buttonTakePhoto.setVisibility(View.GONE);
+            imageViewPhoto.setVisibility(View.GONE);
+            editTextPhone.setVisibility(View.GONE);
+
+            // Show fragment container
+            mainFragmentContainer.setVisibility(View.VISIBLE); // Use new ID
+
+            // BlankFragment's onViewCreated will now handle setting its initial internal layout (layout_view1)
+            // No explicit call to showSpecificLayout from MainActivity is needed here.
 
         } else {
             Toast.makeText(this, "שם משתמש או שם משפחה שגויים. נסה שוב.", Toast.LENGTH_LONG).show();
-            fragmentContainer.setVisibility(View.GONE);
-            if (blankFragment != null) {
-                blankFragment.hideAll();
-            }
-            // ודא שהכפתורים והתמונה גלויים אם הולידציה נכשלה בגלל שם משתמש/משפחה שגויים
+            mainFragmentContainer.setVisibility(View.GONE); // Use new ID
             showPreValidationViews();
         }
     }
 
-    // פונקציה עזר להצגת הרכיבים שלפני הולידציה
     private void showPreValidationViews() {
         editTextUsername.setVisibility(View.VISIBLE);
         editTextFamilyName.setVisibility(View.VISIBLE);
